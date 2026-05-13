@@ -1007,7 +1007,7 @@ function switchDay(index) {
 var SHEET_ID = "1UWomv17OtWQJXdsPfRX5cmWogdHp-qWhU5NpGvFaV-0";
 
 function sheetUrl(sheetName) {
-  return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(sheetName);
+  return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&headers=1&range=A2:Z1000&sheet=' + encodeURIComponent(sheetName);
 }
 
 function parseSheetJson(raw) {
