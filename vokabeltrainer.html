@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>England Trip Trainer – RSW</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23C8102E'/><text x='32' y='46' text-anchor='middle' font-size='38' font-family='serif'>🎩</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red: #C8102E;
+    --blue: #012169;
+    --gold: #F4C430;
+    --light: #F8F6F0;
+    --card-bg: #FFFFFF;
+    --text: #1a1a2e;
+    --muted: #5a5a7a;
+    --success: #2a9d4e;
+    --wrong: #d63031;
+    --shadow: 0 4px 20px rgba(1,33,105,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* --- UNION JACK BG PATTERN --- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(200,16,46,0.04) 60px, rgba(200,16,46,0.04) 62px),
+      repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(1,33,105,0.04) 60px, rgba(1,33,105,0.04) 62px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 0 16px 80px; }
+
+  /* --- HEADER --- */
+  header {
+    background: var(--blue);
+    color: white;
+    padding: 18px 24px 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 3px 16px rgba(1,33,105,0.3);
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--red) 33%, white 33%, white 66%, var(--red) 66%);
+  }
+  .logo-flag {
+    font-size: 38px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .header-text h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+  .header-text p {
+    font-size: 12px;
+    opacity: 0.75;
+    font-weight: 600;
+  }
+  .header-score {
+    margin-left: auto;
+    background: var(--gold);
+    color: var(--blue);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 800;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .coin-icon { font-size: 20px; }
+
+  /* --- NAV TABS --- */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--blue);
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 6px;
+  }
+  .tab-btn.active {
+    background: var(--gold);
+    color: var(--blue);
+  }
+  .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.22); color: white; }
+
+  /* --- SECTIONS --- */
+  .section { display: none; padding-top: 20px; }
+  .section.active { display: block; }
+
+  /* --- CATEGORY CARDS (HOME) --- */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    color: var(--blue);
+    margin: 24px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title span { font-size: 26px; }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .cat-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 20px 16px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    border: 3px solid transparent;
+    transition: all 0.22s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--cat-color, var(--blue));
+    border-radius: 18px 18px 0 0;
+  }
+  .cat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(1,33,105,0.18); }
+  .cat-card:active { transform: scale(0.97); }
+  .cat-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+  .cat-name { font-weight: 800; font-size: 14px; color: var(--text); }
+  .cat-count { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .cat-progress-bar {
+    height: 5px;
+    background: #e8e8f0;
+    border-radius: 99px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .cat-progress-fill {
+    height: 100%;
+    background: var(--cat-color, var(--blue));
+    border-radius: 99px;
+    transition: width 0.5s;
+  }
+
+  /* --- PHRASE CARDS --- */
+  .phrase-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .back-btn {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: var(--red); }
+  .phrase-cat-title { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--blue); }
+
+  .phrase-list { display: flex; flex-direction: column; gap: 12px; }
+  .phrase-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--cat-color, var(--blue));
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .phrase-card:hover { transform: translateX(4px); box-shadow: 0 6px 24px rgba(1,33,105,0.16); }
+  .phrase-en {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+  }
+  .phrase-de {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .phrase-tip {
+    font-size: 12px;
+    color: var(--blue);
+    margin-top: 6px;
+    background: rgba(1,33,105,0.07);
+    padding: 5px 10px;
+    border-radius: 8px;
+    display: none;
+  }
+  .phrase-card.open .phrase-tip { display: block; }
+  .phrase-audio-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--cat-color, var(--blue));
+    border: none;
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .phrase-audio-btn:hover { transform: translateY(-50%) scale(1.12); }
+
+  /* --- QUIZ --- */
+  .quiz-container { padding-top: 4px; }
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .quiz-progress-track {
+    flex: 1;
+    height: 10px;
+    background: #dde;
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 0 12px;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--red));
+    border-radius: 99px;
+    transition: width 0.4s;
+  }
+  .quiz-num { font-weight: 800; color: var(--muted); font-size: 14px; }
+  .quiz-streak {
+    background: var(--gold);
+    color: var(--blue);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  .quiz-card {
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 28px 22px;
+    box-shadow: 0 6px 28px rgba(1,33,105,0.14);
+    margin-bottom: 18px;
+    text-align: center;
+    position: relative;
+    border: 3px solid transparent;
+    transition: border-color 0.3s;
+  }
+  .quiz-card.correct { border-color: var(--success); }
+  .quiz-card.wrong { border-color: var(--wrong); }
+
+  .quiz-flag { font-size: 48px; margin-bottom: 12px; }
+  .quiz-question { font-weight: 800; font-size: 13px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .quiz-phrase { font-family: 'Fredoka One', cursive; font-size: 26px; color: var(--blue); line-height: 1.3; }
+  .quiz-mode-badge {
+    display: inline-block;
+    background: rgba(1,33,105,0.08);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .quiz-opt {
+    background: white;
+    border: 2.5px solid #dde;
+    border-radius: 14px;
+    padding: 14px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--blue); background: rgba(1,33,105,0.05); transform: scale(1.02); }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-opt.correct { background: #d4f7e4; border-color: var(--success); color: var(--success); }
+  .quiz-opt.wrong { background: #fdd; border-color: var(--wrong); color: var(--wrong); }
+  .quiz-opt.reveal { background: #d4f7e4; border-color: var(--success); color: var(--success); }
+
+  .quiz-feedback {
+    min-height: 48px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .quiz-feedback.show { opacity: 1; }
+  .quiz-feedback.correct { background: #d4f7e4; color: var(--success); }
+  .quiz-feedback.wrong { background: #fdd; color: var(--wrong); }
+
+  .quiz-next-btn {
+    width: 100%;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+  .quiz-next-btn:hover { background: var(--red); transform: translateY(-2px); }
+
+  .coin-burst {
+    position: fixed;
+    font-size: 26px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: coinFly 1s ease-out forwards;
+  }
+  @keyframes coinFly {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+  }
+
+  /* --- RESULTS --- */
+  .results-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 32px 24px;
+    box-shadow: 0 8px 36px rgba(1,33,105,0.16);
+    text-align: center;
+    margin-top: 20px;
+  }
+  .results-trophy { font-size: 64px; margin-bottom: 10px; }
+  .results-title { font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--blue); margin-bottom: 6px; }
+  .results-sub { color: var(--muted); font-weight: 600; font-size: 15px; margin-bottom: 20px; }
+  .results-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .stat-box {
+    background: rgba(1,33,105,0.06);
+    border-radius: 14px;
+    padding: 14px 10px;
+  }
+  .stat-num { font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--blue); }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 700; }
+  .analysis-box {
+    background: linear-gradient(135deg, var(--blue) 0%, #1a3a8f 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    margin-bottom: 18px;
+  }
+  .analysis-box h3 { font-family: 'Fredoka One', cursive; font-size: 18px; margin-bottom: 8px; }
+  .analysis-box p { font-size: 14px; line-height: 1.6; opacity: 0.92; }
+  .results-earned {
+    background: var(--gold);
+    color: var(--blue);
+    border-radius: 16px;
+    padding: 14px;
+    font-weight: 800;
+    font-size: 18px;
+    margin-bottom: 18px;
+  }
+  .restart-btn {
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 28px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 6px;
+  }
+  .restart-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(200,16,46,0.35); }
+  .restart-btn.secondary {
+    background: var(--blue);
+  }
+
+  /* --- PHRASEBOOK --- */
+  .pb-search {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2.5px solid #dde;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    transition: border 0.2s;
+    background: white;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .pb-search:focus { border-color: var(--blue); }
+  .pb-phrase {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(1,33,105,0.09);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.18s;
+    border-left: 4px solid var(--cat-color, var(--blue));
+  }
+  .pb-phrase:hover { transform: translateX(3px); }
+  .pb-cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--dot-color, var(--blue));
+    flex-shrink: 0;
+  }
+  .pb-en { font-weight: 800; font-size: 15px; color: var(--text); }
+  .pb-de { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .pb-play {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* --- LEADERBOARD / SCORE TAB --- */
+  .score-hero {
+    background: linear-gradient(135deg, var(--blue) 0%, #1a3a8f 100%);
+    border-radius: 22px;
+    padding: 28px 22px;
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 28px rgba(1,33,105,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .score-hero::before {
+    content: '🇬🇧';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.08;
+    right: -20px;
+    bottom: -20px;
+  }
+  .score-hero-num { font-family: 'Fredoka One', cursive; font-size: 56px; color: var(--gold); }
+  .score-hero-label { font-size: 14px; opacity: 0.8; margin-bottom: 4px; font-weight: 700; }
+  .score-hero-sub { font-size: 13px; opacity: 0.65; }
+
+  .milestone-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .milestone {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: var(--shadow);
+    opacity: 0.45;
+    transition: opacity 0.3s;
+  }
+  .milestone.unlocked { opacity: 1; }
+  .milestone-icon { font-size: 28px; }
+  .milestone-info { flex: 1; }
+  .milestone-name { font-weight: 800; font-size: 14px; }
+  .milestone-req { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .milestone-check { font-size: 22px; }
+
+  /* --- QUIZ START SCREEN --- */
+  .quiz-start {
+    text-align: center;
+    padding: 30px 0;
+  }
+  .quiz-start h2 { font-family: 'Fredoka One', cursive; font-size: 26px; color: var(--blue); margin: 10px 0 8px; }
+  .quiz-start p { color: var(--muted); font-weight: 600; font-size: 15px; margin-bottom: 24px; }
+  .quiz-cat-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .qcat-btn {
+    background: white;
+    border: 2.5px solid #dde;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qcat-btn.selected { border-color: var(--blue); background: rgba(1,33,105,0.07); }
+  .qcat-btn:hover { border-color: var(--blue); }
+  .start-quiz-btn {
+    background: linear-gradient(135deg, var(--red), #e84393);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 16px 36px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.22s;
+    box-shadow: 0 4px 18px rgba(200,16,46,0.35);
+  }
+  .start-quiz-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 26px rgba(200,16,46,0.4); }
+
+  /* Floating score notification */
+  .notif {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    background: var(--gold);
+    color: var(--blue);
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-weight: 800;
+    font-size: 16px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .notif.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 420px) {
+    .quiz-options { grid-template-columns: 1fr; }
+    .cat-grid { grid-template-columns: 1fr 1fr; }
+    .results-stats { grid-template-columns: 1fr 1fr; }
+    .quiz-cat-select { grid-template-columns: 1fr; }
+  }
+
+  /* ===== THAMES GAME OVERLAY ===== */
+  #game-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  #game-overlay.active { display: flex; }
+
+  #game-canvas {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    touch-action: none;
+  }
+
+  #game-hud {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(1,33,105,0.92);
+    color: white;
+  }
+  .ghud-score { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--gold); }
+  .ghud-lives { font-size: 20px; letter-spacing: 2px; }
+  .ghud-close {
+    background: var(--red);
+    border: none;
+    color: white;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  #game-unlock-banner {
+    background: linear-gradient(135deg, #F4C430, #f9a825);
+    color: var(--blue);
+    border-radius: 18px;
+    padding: 18px 22px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 18px rgba(244,196,48,0.4);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  #game-unlock-banner:hover { transform: scale(1.02); }
+  #game-unlock-banner h3 { font-family: 'Fredoka One', cursive; font-size: 20px; margin-bottom: 6px; }
+  #game-unlock-banner p { font-size: 14px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-flag">🇬🇧</div>
+  <div class="header-text">
+    <h1>England Trip Trainer</h1>
+    <p>Realschule Weilheim · RSW © Frank Steyer</p>
+  </div>
+  <div class="header-score">
+    <span class="coin-icon">💷</span>
+    <span id="total-score">0</span>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showSection('home')">🏠 Start</button>
+  <button class="tab-btn" onclick="showSection('quiz')">🎯 Quiz</button>
+  <button class="tab-btn" onclick="showSection('phrasebook')">📖 Phrasebook</button>
+  <button class="tab-btn" onclick="showSection('scores')">🏆 Punkte</button>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div class="section active" id="section-home">
+    <div class="section-title"><span>📚</span> Wähle ein Thema</div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <div class="section-title" style="margin-top:6px"><span>💡</span> Tipp des Tages</div>
+    <div id="daily-tip" style="background:white;border-radius:16px;padding:18px;box-shadow:var(--shadow);border-left:5px solid var(--gold);">
+      <div style="font-weight:800;font-size:15px;" id="tip-en"></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;" id="tip-de"></div>
+      <div style="font-size:12px;color:var(--blue);margin-top:8px;font-weight:700;" id="tip-tip"></div>
+    </div>
+  </div>
+
+  <!-- PHRASE VIEW -->
+  <div class="section" id="section-phrases">
+    <div class="phrase-header">
+      <button class="back-btn" onclick="showSection('home')">←</button>
+      <span class="phrase-cat-title" id="phrase-cat-title">Phrases</span>
+    </div>
+    <div class="phrase-list" id="phrase-list"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section" id="section-quiz">
+    <div id="quiz-start-screen" class="quiz-start">
+      <div style="font-size:64px">🎯</div>
+      <h2>Quiz starten!</h2>
+      <p>Wähle deine Kategorien und beweise dein Englisch!</p>
+      <div class="quiz-cat-select" id="quiz-cat-select"></div>
+      <button class="start-quiz-btn" onclick="startQuiz()">🚀 Quiz starten!</button>
+    </div>
+    <div id="quiz-play-screen" style="display:none;">
+      <div class="quiz-meta">
+        <span class="quiz-num" id="quiz-num">1/10</span>
+        <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quiz-prog" style="width:0%"></div></div>
+        <span class="quiz-streak" id="quiz-streak">🔥 0</span>
+      </div>
+      <div class="quiz-card" id="quiz-card">
+        <div class="quiz-flag" id="quiz-flag">🇬🇧</div>
+        <div class="quiz-question" id="quiz-q-label">Wie heißt das auf Englisch?</div>
+        <div class="quiz-phrase" id="quiz-phrase"></div>
+        <div class="quiz-mode-badge" id="quiz-mode-badge"></div>
+      </div>
+      <div class="quiz-options" id="quiz-opts"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuestion()">Weiter →</button>
+    </div>
+    <div id="quiz-results-screen" style="display:none;"></div>
+  </div>
+
+  <!-- PHRASEBOOK -->
+  <div class="section" id="section-phrasebook">
+    <div class="section-title"><span>📖</span> Alle Redewendungen</div>
+    <input class="pb-search" type="text" placeholder="🔍  Suchen auf Englisch oder Deutsch..." oninput="filterPhrases(this.value)" id="pb-search">
+    <div id="pb-list"></div>
+  </div>
+
+  <!-- SCORES -->
+  <div class="section" id="section-scores">
+    <div class="section-title"><span>🏆</span> Dein Punktestand</div>
+    <div class="score-hero">
+      <div class="score-hero-label">Gesammelte Pfund</div>
+      <div class="score-hero-num" id="score-hero-num">£ 0</div>
+      <div class="score-hero-sub" id="score-hero-sub">Mach dein erstes Quiz!</div>
+    </div>
+    <div class="section-title"><span>🎖️</span> Abzeichen</div>
+    <div class="milestone-list" id="milestone-list"></div>
+    <div class="section-title"><span>📊</span> Statistiken</div>
+    <div class="results-stats" style="margin-bottom:24px">
+      <div class="stat-box"><div class="stat-num" id="stat-quizzes">0</div><div class="stat-label">Quiz gespielt</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-correct">0</div><div class="stat-label">Richtig</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-streak">0</div><div class="stat-label">Best Streak</div></div>
+    </div>
+    <button class="restart-btn secondary" style="width:100%" onclick="if(confirm('Wirklich alles zurücksetzen?')){resetAll();showSection('scores');}">🔄 Alles zurücksetzen</button>
+  </div>
+
+</div>
+
+<!-- ===== THAMES RIVER GAME OVERLAY ===== -->
+<div id="game-overlay">
+  <div id="game-hud">
+    <div class="ghud-score">⛵ <span id="g-score">0</span></div>
+    <div class="ghud-lives" id="g-lives">❤️❤️❤️</div>
+    <button class="ghud-close" onclick="closeGame()">✖ Schließen</button>
+  </div>
+  <canvas id="game-canvas"></canvas>
+</div>
+
+<script>
+// ==================== DATA ====================
+const CATEGORIES = [
+  { id: 'greeting', name: 'Begrüßung', emoji: '👋', color: '#012169' },
+  { id: 'polite',   name: 'Höflichkeit', emoji: '🎩', color: '#C8102E' },
+  { id: 'shop',     name: 'Einkaufen', emoji: '🛍️', color: '#2a9d4e' },
+  { id: 'food',     name: 'Essen & Café', emoji: '☕', color: '#d4720a' },
+  { id: 'tourist',  name: 'Tourismus', emoji: '🗺️', color: '#8e44ad' },
+  { id: 'transport',name: 'Verkehr', emoji: '🚌', color: '#c0392b' },
+  { id: 'hotel',    name: 'Hotel', emoji: '🏨', color: '#1a7a9e' },
+  { id: 'help',     name: 'Hilfe & Notfall', emoji: '🆘', color: '#c0392b' },
+  { id: 'smalltalk',name: 'Smalltalk', emoji: '💬', color: '#e91e63' },
+  { id: 'school',   name: 'Schule & Alltag', emoji: '🎒', color: '#795548' },
+];
+
+const PHRASES = [
+  // Greetings
+  { cat:'greeting', en:"Hello! / Hi!", de:"Hallo!", tip:"'Hi' ist informeller und passt zu Gleichaltrigen." },
+  { cat:'greeting', en:"Good morning!", de:"Guten Morgen!" },
+  { cat:'greeting', en:"Good afternoon!", de:"Guten Tag! (nachmittags)" },
+  { cat:'greeting', en:"Good evening!", de:"Guten Abend!" },
+  { cat:'greeting', en:"How are you?", de:"Wie geht es dir/Ihnen?" },
+  { cat:'greeting', en:"I'm fine, thanks! And you?", de:"Mir geht es gut, danke! Und dir?" },
+  { cat:'greeting', en:"Nice to meet you!", de:"Schön, dich/Sie kennen zu lernen!" },
+  { cat:'greeting', en:"Goodbye! / Bye!", de:"Auf Wiedersehen!" },
+  { cat:'greeting', en:"See you later!", de:"Bis später!" },
+  { cat:'greeting', en:"Have a good day!", de:"Schönen Tag noch!", tip:"Wird sehr häufig beim Abschied gesagt." },
+
+  // Polite
+  { cat:'polite', en:"Please.", de:"Bitte.", tip:"Immer dazusagen! Ohne 'please' wirkt man unhöflich." },
+  { cat:'polite', en:"Thank you (very much)!", de:"Danke (sehr)!" },
+  { cat:'polite', en:"You're welcome!", de:"Bitte sehr! / Kein Problem!" },
+  { cat:'polite', en:"Excuse me.", de:"Entschuldigung. (um Aufmerksamkeit zu bekommen)", tip:"'Excuse me' benutzt man, um jemanden anzusprechen oder wenn man vorbei möchte." },
+  { cat:'polite', en:"Sorry!", de:"Entschuldigung! (wenn man einen Fehler gemacht hat)" },
+  { cat:'polite', en:"Could you help me, please?", de:"Könnten Sie mir bitte helfen?" },
+  { cat:'polite', en:"No problem!", de:"Kein Problem!" },
+  { cat:'polite', en:"Could you say that again, please?", de:"Könnten Sie das bitte wiederholen?" },
+  { cat:'polite', en:"I don't understand.", de:"Ich verstehe das nicht." },
+  { cat:'polite', en:"Could you speak more slowly, please?", de:"Könnten Sie bitte langsamer sprechen?" },
+  { cat:'polite', en:"That's very kind of you!", de:"Das ist sehr nett von Ihnen!" },
+
+  // Shopping
+  { cat:'shop', en:"How much is this?", de:"Wie viel kostet das?" },
+  { cat:'shop', en:"Can I pay by card?", de:"Kann ich mit Karte zahlen?", tip:"In England ist kontaktloses Zahlen ('contactless') sehr verbreitet." },
+  { cat:'shop', en:"I'd like to buy this.", de:"Ich möchte das kaufen." },
+  { cat:'shop', en:"Do you have this in a different size?", de:"Haben Sie das in einer anderen Größe?" },
+  { cat:'shop', en:"Do you have this in a different colour?", de:"Haben Sie das in einer anderen Farbe?", tip:"Britisches Englisch schreibt 'colour', nicht 'color'." },
+  { cat:'shop', en:"I'm just looking, thank you.", de:"Ich schaue mich nur um, danke.", tip:"Kein Stress – das sagt man, wenn man nicht kaufen möchte." },
+  { cat:'shop', en:"Can I have a receipt, please?", de:"Kann ich bitte eine Quittung haben?" },
+  { cat:'shop', en:"Do you take euros?", de:"Nehmen Sie auch Euro an?", tip:"England hat das Pfund Sterling (£). Euro wird selten akzeptiert." },
+  { cat:'shop', en:"Is there a sale?", de:"Gibt es gerade einen Rabatt / Ausverkauf?" },
+  { cat:'shop', en:"Where is the fitting room?", de:"Wo ist die Umkleidekabine?" },
+
+  // Food & Café
+  { cat:'food', en:"A table for four, please.", de:"Einen Tisch für vier Personen, bitte." },
+  { cat:'food', en:"Can I see the menu, please?", de:"Kann ich bitte die Speisekarte sehen?" },
+  { cat:'food', en:"I'd like a coffee, please.", de:"Ich hätte gerne einen Kaffee, bitte." },
+  { cat:'food', en:"What do you recommend?", de:"Was empfehlen Sie?" },
+  { cat:'food', en:"I'm vegetarian.", de:"Ich bin Vegetarier/in." },
+  { cat:'food', en:"Is there a vegetarian option?", de:"Gibt es eine vegetarische Option?" },
+  { cat:'food', en:"The bill, please.", de:"Die Rechnung, bitte.", tip:"In England sagt man 'bill', nicht 'check'." },
+  { cat:'food', en:"Could I have some water, please?", de:"Könnte ich bitte etwas Wasser bekommen?" },
+  { cat:'food', en:"That was delicious!", de:"Das war lecker!" },
+  { cat:'food', en:"To eat in or take away?", de:"Hier essen oder zum Mitnehmen?", tip:"Diese Frage hörst du häufig bei Fast Food." },
+  { cat:'food', en:"One fish and chips, please!", de:"Einmal Fish and Chips, bitte!", tip:"Das Nationalgericht! Mit 'salt and vinegar' probieren." },
+
+  // Tourism
+  { cat:'tourist', en:"Excuse me, where is the...?", de:"Entschuldigung, wo ist der/die/das...?" },
+  { cat:'tourist', en:"How do I get to the city centre?", de:"Wie komme ich zum Stadtzentrum?", tip:"Britisch: 'centre', amerikanisch: 'center'." },
+  { cat:'tourist', en:"Is it far from here?", de:"Ist es weit von hier?" },
+  { cat:'tourist', en:"Can I take a photo here?", de:"Darf ich hier ein Foto machen?" },
+  { cat:'tourist', en:"When does it open / close?", de:"Wann öffnet / schließt es?" },
+  { cat:'tourist', en:"How much is the entrance fee?", de:"Wie viel kostet der Eintritt?" },
+  { cat:'tourist', en:"Is there a guided tour?", de:"Gibt es eine Führung?" },
+  { cat:'tourist', en:"Two tickets, please.", de:"Zwei Tickets, bitte." },
+  { cat:'tourist', en:"Where is the nearest toilet?", de:"Wo ist die nächste Toilette?", tip:"'Toilet' oder 'loo' – beides ist akzeptabel in England." },
+  { cat:'tourist', en:"Which way is the exit?", de:"Wo ist der Ausgang?" },
+
+  // Transport
+  { cat:'transport', en:"Where is the nearest bus stop?", de:"Wo ist die nächste Bushaltestelle?" },
+  { cat:'transport', en:"One single to..., please.", de:"Einmal einfach nach..., bitte.", tip:"'Single' = einfache Fahrt, 'return' = Hin- und Rückfahrt." },
+  { cat:'transport', en:"One return to..., please.", de:"Einmal hin und zurück nach..., bitte." },
+  { cat:'transport', en:"Does this bus go to...?", de:"Fährt dieser Bus nach...?" },
+  { cat:'transport', en:"When is the next train to...?", de:"Wann fährt der nächste Zug nach...?" },
+  { cat:'transport', en:"Which platform?", de:"Welcher Bahnsteig?" },
+  { cat:'transport', en:"I've missed my bus.", de:"Ich habe meinen Bus verpasst." },
+  { cat:'transport', en:"Can you call a taxi, please?", de:"Können Sie bitte ein Taxi rufen?" },
+  { cat:'transport', en:"How long does it take?", de:"Wie lange dauert die Fahrt?" },
+  { cat:'transport', en:"Mind the gap!", de:"Vorsicht, Abstand zur Bahnsteigkante!", tip:"Das ist der berühmte Spruch der Londoner U-Bahn." },
+
+  // Hotel
+  { cat:'hotel', en:"I have a reservation.", de:"Ich habe eine Reservierung." },
+  { cat:'hotel', en:"Can I check in, please?", de:"Ich möchte einchecken, bitte." },
+  { cat:'hotel', en:"What time is check-out?", de:"Wann ist der Check-out?" },
+  { cat:'hotel', en:"My room key, please.", de:"Meinen Zimmerschlüssel, bitte." },
+  { cat:'hotel', en:"Is breakfast included?", de:"Ist Frühstück inbegriffen?" },
+  { cat:'hotel', en:"There is a problem with my room.", de:"Es gibt ein Problem mit meinem Zimmer." },
+  { cat:'hotel', en:"The shower doesn't work.", de:"Die Dusche funktioniert nicht." },
+  { cat:'hotel', en:"Can I have more towels, please?", de:"Kann ich bitte mehr Handtücher haben?" },
+  { cat:'hotel', en:"What is the Wi-Fi password?", de:"Wie lautet das WLAN-Passwort?" },
+  { cat:'hotel', en:"Where is the lift?", de:"Wo ist der Aufzug?", tip:"Britisch: 'lift', amerikanisch: 'elevator'." },
+
+  // Help & Emergency
+  { cat:'help', en:"Help!", de:"Hilfe!" },
+  { cat:'help', en:"Call the police!", de:"Rufen Sie die Polizei!" },
+  { cat:'help', en:"Call an ambulance!", de:"Rufen Sie einen Krankenwagen!" },
+  { cat:'help', en:"I need a doctor.", de:"Ich brauche einen Arzt." },
+  { cat:'help', en:"I've lost my passport.", de:"Ich habe meinen Pass verloren." },
+  { cat:'help', en:"I've been robbed.", de:"Ich wurde bestohlen." },
+  { cat:'help', en:"Where is the nearest hospital?", de:"Wo ist das nächste Krankenhaus?" },
+  { cat:'help', en:"I'm allergic to...", de:"Ich bin allergisch gegen..." },
+  { cat:'help', en:"I'm not feeling well.", de:"Ich fühle mich nicht gut." },
+  { cat:'help', en:"Please call my teacher.", de:"Bitte rufen Sie meine Lehrerin / meinen Lehrer an." },
+
+  // Smalltalk
+  { cat:'smalltalk', en:"What's your name?", de:"Wie heißt du?" },
+  { cat:'smalltalk', en:"My name is...", de:"Mein Name ist / Ich heiße..." },
+  { cat:'smalltalk', en:"Where are you from?", de:"Woher kommst du?" },
+  { cat:'smalltalk', en:"I'm from Germany.", de:"Ich komme aus Deutschland." },
+  { cat:'smalltalk', en:"How old are you?", de:"Wie alt bist du?" },
+  { cat:'smalltalk', en:"I'm 14 years old.", de:"Ich bin 14 Jahre alt." },
+  { cat:'smalltalk', en:"Do you speak German?", de:"Sprichst du Deutsch?" },
+  { cat:'smalltalk', en:"Only a little, sorry!", de:"Nur ein bisschen, leider!", tip:"Das sagt man, wenn jemand fragt, ob du Englisch sprichst." },
+  { cat:'smalltalk', en:"What do you like doing?", de:"Was machst du gerne?" },
+  { cat:'smalltalk', en:"I love music / football / gaming!", de:"Ich liebe Musik / Fußball / Gaming!" },
+  { cat:'smalltalk', en:"Lovely weather today, isn't it?", de:"Tolles Wetter heute, oder?", tip:"In England redet man ständig über das Wetter!" },
+
+  // School & Everyday
+  { cat:'school', en:"Where is the toilet, please?", de:"Wo ist bitte die Toilette?" },
+  { cat:'school', en:"Can I borrow a pen, please?", de:"Kann ich bitte einen Stift ausleihen?" },
+  { cat:'school', en:"I don't understand the question.", de:"Ich verstehe die Frage nicht." },
+  { cat:'school', en:"Can you help me with this?", de:"Können Sie mir dabei helfen?" },
+  { cat:'school', en:"What time is it?", de:"Wie spät ist es?" },
+  { cat:'school', en:"What does '...' mean?", de:"Was bedeutet '...'?" },
+  { cat:'school', en:"How do you spell that?", de:"Wie schreibt man das?" },
+  { cat:'school', en:"I'm late.", de:"Ich komme zu spät." },
+  { cat:'school', en:"Where do we meet?", de:"Wo treffen wir uns?" },
+  { cat:'school', en:"That's so cool!", de:"Das ist total cool!" },
+];
+
+const MILESTONES = [
+  { name: "Tourist Starter", req: 10,  icon: "🌱", label: "Erste 10 Pfund" },
+  { name: "Tea Champion",    req: 30,  icon: "☕", label: "30 Pfund gesammelt" },
+  { name: "London Explorer", req: 60,  icon: "🗺️", label: "60 Pfund – Guter Fortschritt!" },
+  { name: "Big Ben Master",  req: 100, icon: "🏛️", label: "100 Pfund – Du bist ein Profi!" },
+  { name: "Royal Champion",  req: 150, icon: "👑", label: "150 Pfund – Königliche Klasse!" },
+];
+
+// ==================== STATE ====================
+let state = JSON.parse(localStorage.getItem('rsw-eng-state') || 'null') || {
+  score: 0, quizzes: 0, totalCorrect: 0, bestStreak: 0,
+  catProgress: {}
+};
+
+function saveState() { localStorage.setItem('rsw-eng-state', JSON.stringify(state)); }
+
+// ==================== QUIZ STATE ====================
+let quizQ = [], quizIdx = 0, quizScore = 0, quizCorrect = 0, quizStreak = 0, quizBestStreak = 0;
+let selectedCats = CATEGORIES.map(c => c.id);
+
+// ==================== INIT ====================
+function init() {
+  buildCatGrid();
+  buildDailyTip();
+  buildQuizCatSelect();
+  buildPhrasebook();
+  buildScores();
+  updateHeaderScore();
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const map = { home:'home', phrases:'home', quiz:'quiz', phrasebook:'phrasebook', scores:'scores' };
+  document.getElementById('section-' + id).classList.add('active');
+  const tabMap = { home:0, phrases:0, quiz:1, phrasebook:2, scores:3 };
+  if (tabMap[id] !== undefined) document.querySelectorAll('.tab-btn')[tabMap[id]].classList.add('active');
+  if (id === 'scores') buildScores();
+}
+
+// ==================== HOME ====================
+function buildCatGrid() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATEGORIES.map(cat => {
+    const total = PHRASES.filter(p => p.cat === cat.id).length;
+    const done = state.catProgress[cat.id] || 0;
+    const pct = Math.min(100, Math.round(done / total * 100));
+    return `<div class="cat-card" style="--cat-color:${cat.color}" onclick="showCategoryPhrases('${cat.id}')">
+      <span class="cat-emoji">${cat.emoji}</span>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-count">${total} Redewendungen</div>
+      <div class="cat-progress-bar"><div class="cat-progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function buildDailyTip() {
+  const tips = PHRASES.filter(p => p.tip);
+  const tip = tips[Math.floor(Date.now() / 86400000) % tips.length];
+  document.getElementById('tip-en').textContent = tip.en;
+  document.getElementById('tip-de').textContent = tip.de;
+  document.getElementById('tip-tip').textContent = '💡 ' + tip.tip;
+}
+
+// ==================== PHRASES ====================
+function showCategoryPhrases(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const phrases = PHRASES.filter(p => p.cat === catId);
+  document.getElementById('phrase-cat-title').textContent = cat.emoji + ' ' + cat.name;
+  const list = document.getElementById('phrase-list');
+  list.innerHTML = phrases.map((p, i) => `
+    <div class="phrase-card" style="--cat-color:${cat.color}" id="pc${i}" onclick="togglePhrase(${i},'${catId}')">
+      <div class="phrase-en" style="padding-right:44px">${p.en}</div>
+      <div class="phrase-de">${p.de}</div>
+      ${p.tip ? `<div class="phrase-tip">💡 ${p.tip}</div>` : ''}
+      <button class="phrase-audio-btn" style="background:${cat.color}" onclick="event.stopPropagation();speakPhrase('${p.en.replace(/'/g,"\\'")}')">🔊</button>
+    </div>`).join('');
+  showSection('phrases');
+}
+
+function togglePhrase(i, catId) {
+  const card = document.getElementById('pc' + i);
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    if (!state.catProgress[catId]) state.catProgress[catId] = 0;
+    state.catProgress[catId] = Math.min(PHRASES.filter(p=>p.cat===catId).length, state.catProgress[catId]+1);
+    saveState();
+  }
+}
+
+// ==================== SPEECH ====================
+function speakPhrase(text) {
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-GB';
+  u.rate = 0.85;
+  const voices = window.speechSynthesis.getVoices();
+  const en = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en'));
+  if (en) u.voice = en;
+  window.speechSynthesis.speak(u);
+}
+
+// ==================== QUIZ ====================
+function buildQuizCatSelect() {
+  const div = document.getElementById('quiz-cat-select');
+  div.innerHTML = CATEGORIES.map(c => `
+    <button class="qcat-btn selected" id="qcb-${c.id}" onclick="toggleCat('${c.id}')">
+      ${c.emoji} ${c.name}
+    </button>`).join('');
+}
+
+function toggleCat(id) {
+  const btn = document.getElementById('qcb-' + id);
+  const idx = selectedCats.indexOf(id);
+  if (idx === -1) { selectedCats.push(id); btn.classList.add('selected'); }
+  else if (selectedCats.length > 1) { selectedCats.splice(idx,1); btn.classList.remove('selected'); }
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function startQuiz() {
+  const pool = shuffle(PHRASES.filter(p => selectedCats.includes(p.cat)));
+  quizQ = pool.slice(0, Math.min(10, pool.length));
+  quizIdx = 0; quizScore = 0; quizCorrect = 0; quizStreak = 0; quizBestStreak = 0;
+  document.getElementById('quiz-start-screen').style.display = 'none';
+  document.getElementById('quiz-results-screen').style.display = 'none';
+  document.getElementById('quiz-play-screen').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQ[quizIdx];
+  const total = quizQ.length;
+  const isEnToDe = Math.random() > 0.5;
+
+  document.getElementById('quiz-num').textContent = (quizIdx+1)+'/'+total;
+  document.getElementById('quiz-prog').style.width = (quizIdx/total*100)+'%';
+  document.getElementById('quiz-streak').textContent = '🔥 '+quizStreak;
+  document.getElementById('quiz-card').classList.remove('correct','wrong');
+  document.getElementById('quiz-feedback').className = 'quiz-feedback';
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-next-btn').style.display = 'none';
+
+  if (isEnToDe) {
+    document.getElementById('quiz-flag').textContent = '🇬🇧';
+    document.getElementById('quiz-q-label').textContent = 'Was bedeutet das auf Deutsch?';
+    document.getElementById('quiz-phrase').textContent = q.en;
+    document.getElementById('quiz-mode-badge').textContent = '🇬🇧 → 🇩🇪';
+  } else {
+    document.getElementById('quiz-flag').textContent = '🇩🇪';
+    document.getElementById('quiz-q-label').textContent = 'Wie sagt man das auf Englisch?';
+    document.getElementById('quiz-phrase').textContent = q.de;
+    document.getElementById('quiz-mode-badge').textContent = '🇩🇪 → 🇬🇧';
+  }
+
+  // Options: 1 correct + 3 wrong
+  const correct = isEnToDe ? q.de : q.en;
+  const wrongPool = shuffle(PHRASES.filter(p => p !== q)).map(p => isEnToDe ? p.de : p.en);
+  const options = shuffle([correct, ...wrongPool.slice(0,3)]);
+
+  const optsEl = document.getElementById('quiz-opts');
+  optsEl.innerHTML = options.map(opt => `
+    <button class="quiz-opt" onclick="answerQ('${opt.replace(/'/g,"\\'")}','${correct.replace(/'/g,"\\'")}','${q.en.replace(/'/g,"\\'")}')">
+      ${opt}
+    </button>`).join('');
+}
+
+function answerQ(chosen, correct, enPhrase) {
+  const isRight = chosen === correct;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.trim() === correct) btn.classList.add('correct');
+    else if (btn.textContent.trim() === chosen && !isRight) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('quiz-feedback');
+  const card = document.getElementById('quiz-card');
+
+  if (isRight) {
+    quizCorrect++;
+    quizStreak++;
+    quizBestStreak = Math.max(quizStreak, quizBestStreak);
+    const bonus = quizStreak >= 3 ? 2 : 1;
+    const earned = 5 * bonus;
+    quizScore += earned;
+    state.score += earned;
+    state.totalCorrect++;
+    updateHeaderScore();
+    showNotif(`+£${earned}${quizStreak>=3?' 🔥 Combo!':''}`);
+    spawnCoin();
+    card.classList.add('correct');
+    fb.textContent = quizStreak >= 3 ? `🔥 ${quizStreak}er Combo! +£${earned}` : `✅ Richtig! +£${earned}`;
+    fb.className = 'quiz-feedback show correct';
+    speakPhrase(enPhrase);
+  } else {
+    quizStreak = 0;
+    card.classList.add('wrong');
+    fb.textContent = `❌ Falsch. Richtig: ${correct}`;
+    fb.className = 'quiz-feedback show wrong';
+  }
+
+  document.getElementById('quiz-streak').textContent = '🔥 '+quizStreak;
+  document.getElementById('quiz-next-btn').style.display = 'block';
+  saveState();
+}
+
+function nextQuestion() {
+  quizIdx++;
+  if (quizIdx >= quizQ.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  state.quizzes++;
+  state.bestStreak = Math.max(state.bestStreak, quizBestStreak);
+  saveState();
+
+  const pct = Math.round(quizCorrect / quizQ.length * 100);
+  let trophy, title, analysis;
+  if (pct >= 90) {
+    trophy = '🏆'; title = 'Brilliant! Absolut spitze!';
+    analysis = `Wow, ${pct}% richtig – du bist bereit für England! Du könntest problemlos Gespräche führen, einkaufen und auf Reisen navigieren. Keep it up, mate! 🇬🇧`;
+  } else if (pct >= 70) {
+    trophy = '🥇'; title = 'Sehr gut! Du schaffst das!';
+    analysis = `${pct}% – das ist ein starkes Ergebnis! Du kennst die wichtigsten Redewendungen. Übe noch ein paarmal und du wirst in England keine Probleme haben. Brilliant!`;
+  } else if (pct >= 50) {
+    trophy = '🥈'; title = 'Guter Anfang! Weiter üben!';
+    analysis = `${pct}% – schon ordentlich! Mit etwas mehr Übung wirst du noch viel sicherer. Schau dir nochmal die Kategorien an, bei denen du Fehler gemacht hast. You can do it!`;
+  } else {
+    trophy = '📚'; title = 'Noch Luft nach oben – los geht\'s!';
+    analysis = `${pct}% – das ist noch nicht wo du hin willst, aber kein Problem! Schau dir die Phrasesammlung nochmal an und starte dann erneut. Practice makes perfect!`;
+  }
+
+  const gameUnlocked = pct >= 70;
+
+  document.getElementById('quiz-play-screen').style.display = 'none';
+  const rs = document.getElementById('quiz-results-screen');
+  rs.style.display = 'block';
+  rs.innerHTML = `<div class="results-card">
+    <div class="results-trophy">${trophy}</div>
+    <div class="results-title">${title}</div>
+    <div class="results-sub">${quizCorrect} von ${quizQ.length} richtig beantwortet</div>
+    <div class="results-stats">
+      <div class="stat-box"><div class="stat-num">${pct}%</div><div class="stat-label">Quote</div></div>
+      <div class="stat-box"><div class="stat-num">${quizBestStreak}</div><div class="stat-label">Best Streak</div></div>
+      <div class="stat-box"><div class="stat-num">£${quizScore}</div><div class="stat-label">Verdient</div></div>
+    </div>
+    <div class="results-earned">💷 Insgesamt: £${state.score} gesammelt!</div>
+    <div class="analysis-box"><h3>📊 Deine Analyse</h3><p>${analysis}</p></div>
+    ${gameUnlocked ? `
+    <div id="game-unlock-banner" onclick="openGame()">
+      <h3>🎮 Belohnung freigeschaltet!</h3>
+      <p>Du hast ${pct}% erreicht – jetzt darfst du auf der Themse rudern!<br>
+      <strong>Tippe hier, um das Spiel zu starten ⛵</strong></p>
+    </div>` : `
+    <div style="background:#f0f0f8;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px;font-size:14px;color:var(--muted);font-weight:700;">
+      🎮 Erreiche 70% für das Themse-Spiel als Belohnung! (${pct}% / 70%)
+    </div>`}
+    <button class="restart-btn" onclick="resetQuizScreen()">🔄 Nochmal spielen</button>
+    <button class="restart-btn secondary" onclick="showSection('phrasebook')">📖 Phrasebook</button>
+  </div>`;
+}
+
+function resetQuizScreen() {
+  document.getElementById('quiz-results-screen').style.display = 'none';
+  document.getElementById('quiz-start-screen').style.display = 'block';
+}
+
+// ==================== PHRASEBOOK ====================
+function buildPhrasebook() {
+  renderPhrases(PHRASES);
+}
+
+function renderPhrases(list) {
+  const el = document.getElementById('pb-list');
+  el.innerHTML = list.map(p => {
+    const cat = CATEGORIES.find(c => c.id === p.cat);
+    return `<div class="pb-phrase" style="--cat-color:${cat.color}">
+      <div class="pb-cat-dot" style="background:${cat.color}"></div>
+      <div style="flex:1">
+        <div class="pb-en">${p.en}</div>
+        <div class="pb-de">${p.de}</div>
+      </div>
+      <button class="pb-play" onclick="speakPhrase('${p.en.replace(/'/g,"\\'")}')">🔊</button>
+    </div>`;
+  }).join('');
+}
+
+function filterPhrases(q) {
+  const lq = q.toLowerCase();
+  const filtered = PHRASES.filter(p => p.en.toLowerCase().includes(lq) || p.de.toLowerCase().includes(lq));
+  renderPhrases(filtered);
+}
+
+// ==================== SCORES ====================
+function buildScores() {
+  document.getElementById('score-hero-num').textContent = '£ ' + state.score;
+  const subs = ['Mach dein erstes Quiz!','Gut gemacht! Weiter so!','Du bist auf dem richtigen Weg!','Klasse Leistung!','Du bist ein England-Profi!'];
+  const si = Math.min(4, Math.floor(state.score / 30));
+  document.getElementById('score-hero-sub').textContent = subs[si];
+  document.getElementById('stat-quizzes').textContent = state.quizzes;
+  document.getElementById('stat-correct').textContent = state.totalCorrect;
+  document.getElementById('stat-streak').textContent = state.bestStreak;
+
+  const ml = document.getElementById('milestone-list');
+  ml.innerHTML = MILESTONES.map(m => {
+    const unlocked = state.score >= m.req;
+    return `<div class="milestone ${unlocked?'unlocked':''}">
+      <span class="milestone-icon">${m.icon}</span>
+      <div class="milestone-info">
+        <div class="milestone-name">${m.name}</div>
+        <div class="milestone-req">${m.label} · ${m.req} Pfund nötig</div>
+      </div>
+      <span class="milestone-check">${unlocked?'✅':'🔒'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ==================== UI HELPERS ====================
+function updateHeaderScore() {
+  document.getElementById('total-score').textContent = '£' + state.score;
+}
+
+let notifTimer;
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => n.classList.remove('show'), 1800);
+}
+
+function spawnCoin() {
+  const el = document.createElement('div');
+  el.className = 'coin-burst';
+  el.textContent = '💷';
+  el.style.left = (30 + Math.random() * 60) + '%';
+  el.style.top = '40%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function resetAll() {
+  state = { score:0, quizzes:0, totalCorrect:0, bestStreak:0, catProgress:{} };
+  saveState();
+  updateHeaderScore();
+  buildCatGrid();
+}
+
+// Load voices
+window.speechSynthesis && window.speechSynthesis.getVoices && window.speechSynthesis.getVoices();
+window.addEventListener('DOMContentLoaded', init);
+
+// ==================== THAMES RIVER GAME ====================
+const G = {
+  canvas: null, ctx: null,
+  running: false, raf: null,
+  W: 0, H: 0,
+  score: 0, lives: 3, level: 1,
+  player: { x: 0, y: 0, w: 44, h: 56, vx: 0, speed: 4.5 },
+  obstacles: [],
+  foods: [],
+  particles: [],
+  waveOffset: 0,
+  spawnTimer: 0, spawnInterval: 90,
+  foodSpawnTimer: 0, foodSpawnInterval: 180,
+  lastTime: 0,
+  invincible: 0,
+  bgY: 0,
+  touchStartX: null,
+};
+
+const OBSTACLE_TYPES = [
+  { emoji:'🪵', label:'Log',      w:52, h:34, speed:2.2, pts:5  },
+  { emoji:'⚓', label:'Anchor',   w:36, h:44, speed:2.8, pts:8  },
+  { emoji:'🦢', label:'Swan',     w:50, h:38, speed:1.8, pts:5  },
+  { emoji:'🛶', label:'Canoe',    w:62, h:30, speed:2.5, pts:10 },
+  { emoji:'🚤', label:'Speedboat',w:70, h:32, speed:3.5, pts:15 },
+  { emoji:'🪝', label:'Hook',     w:30, h:40, speed:2.0, pts:5  },
+  { emoji:'🦆', label:'Duck',     w:38, h:34, speed:1.5, pts:3  },
+  { emoji:'🧊', label:'Ice',      w:40, h:40, speed:2.0, pts:5  },
+];
+
+const FOOD_TYPES = [
+  { emoji:'🍔', label:'Burger',   w:44, h:44, speed:2.0, pts:15 },
+  { emoji:'☕', label:'Tea',      w:40, h:40, speed:1.8, pts:20 },
+];
+
+function openGame() {
+  const overlay = document.getElementById('game-overlay');
+  overlay.classList.add('active');
+  initGame();
+}
+
+function closeGame() {
+  G.running = false;
+  if (G.raf) cancelAnimationFrame(G.raf);
+  document.getElementById('game-overlay').classList.remove('active');
+}
+
+function initGame() {
+  G.canvas = document.getElementById('game-canvas');
+  G.ctx = G.canvas.getContext('2d');
+
+  // Size canvas to fit screen
+  const maxW = Math.min(480, window.innerWidth);
+  const maxH = window.innerHeight - 48;
+  G.W = maxW;
+  G.H = maxH;
+  G.canvas.width = G.W;
+  G.canvas.height = G.H;
+  G.canvas.style.width = G.W + 'px';
+  G.canvas.style.height = G.H + 'px';
+
+  G.score = 0; G.lives = 3; G.level = 1;
+  G.obstacles = []; G.foods = []; G.particles = [];
+  G.waveOffset = 0; G.spawnTimer = 0;
+  G.foodSpawnTimer = 0; G.foodSpawnInterval = 180;
+  G.spawnInterval = 90; G.invincible = 0; G.bgY = 0;
+  G.player.x = G.W / 2;
+  G.player.y = G.H - 80;
+  G.player.vx = 0;
+
+  updateHUD();
+  setupGameInput();
+  G.running = true;
+  G.lastTime = performance.now();
+  G.raf = requestAnimationFrame(gameLoop);
+}
+
+function setupGameInput() {
+  const c = G.canvas;
+  c.onmousemove = e => {
+    if (!G.running) return;
+    const r = c.getBoundingClientRect();
+    const scaleX = G.W / r.width;
+    G.player.x = (e.clientX - r.left) * scaleX;
+  };
+  c.ontouchstart = e => { e.preventDefault(); G.touchStartX = e.touches[0].clientX; };
+  c.ontouchmove = e => {
+    e.preventDefault();
+    if (!G.running) return;
+    const r = c.getBoundingClientRect();
+    const scaleX = G.W / r.width;
+    G.player.x = (e.touches[0].clientX - r.left) * scaleX;
+  };
+  document.onkeydown = e => {
+    if (!G.running) return;
+    if (e.key === 'ArrowLeft')  G.player.vx = -G.player.speed;
+    if (e.key === 'ArrowRight') G.player.vx =  G.player.speed;
+  };
+  document.onkeyup = e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') G.player.vx = 0;
+  };
+}
+
+function gameLoop(ts) {
+  if (!G.running) return;
+  const dt = Math.min(ts - G.lastTime, 50);
+  G.lastTime = ts;
+  update(dt);
+  draw();
+  G.raf = requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  const speed = dt / 16.67;
+  G.waveOffset += 0.04 * speed;
+  G.bgY = (G.bgY + 0.6 * speed) % 60;
+  if (G.invincible > 0) G.invincible -= speed;
+
+  // Move player (keyboard)
+  G.player.x += G.player.vx * speed;
+  G.player.x = Math.max(G.player.w/2, Math.min(G.W - G.player.w/2, G.player.x));
+
+  // Spawn obstacles
+  G.spawnTimer += speed;
+  if (G.spawnTimer >= G.spawnInterval) {
+    G.spawnTimer = 0;
+    spawnObstacle();
+    G.spawnInterval = Math.max(38, 90 - G.score * 0.08);
+  }
+
+  // Spawn food items
+  G.foodSpawnTimer += speed;
+  if (G.foodSpawnTimer >= G.foodSpawnInterval) {
+    G.foodSpawnTimer = 0;
+    spawnFood();
+    G.foodSpawnInterval = Math.max(120, 200 - G.score * 0.05);
+  }
+
+  // Update obstacles
+  for (let i = G.obstacles.length - 1; i >= 0; i--) {
+    const o = G.obstacles[i];
+    o.y += o.speed * speed;
+    o.x += Math.sin(o.wobble + G.waveOffset) * 0.6 * speed;
+    o.wobble += 0.03;
+
+    // Off screen
+    if (o.y > G.H + 60) { G.obstacles.splice(i, 1); G.score += o.pts; updateHUD(); continue; }
+
+    // Collision
+    if (G.invincible <= 0 && checkCollision(G.player, o)) {
+      G.obstacles.splice(i, 1);
+      G.lives--;
+      G.invincible = 90;
+      spawnParticles(G.player.x, G.player.y, '#ff4444', 10);
+      updateHUD();
+      if (G.lives <= 0) { gameOver(); return; }
+    }
+  }
+
+  // Update food items
+  for (let i = G.foods.length - 1; i >= 0; i--) {
+    const f = G.foods[i];
+    f.y += f.speed * speed;
+    f.x += Math.sin(f.wobble + G.waveOffset * 0.7) * 0.4 * speed;
+    f.wobble += 0.025;
+    f.pulse = (f.pulse || 0) + 0.08 * speed;
+
+    // Missed food — lose a life
+    if (f.y > G.H + 60) {
+      G.foods.splice(i, 1);
+      G.lives--;
+      G.invincible = 60;
+      spawnParticles(f.x, G.H - 40, '#ff9900', 8);
+      updateHUD();
+      if (G.lives <= 0) { gameOver(); return; }
+      continue;
+    }
+
+    // Caught food
+    if (checkCollision(G.player, f)) {
+      G.foods.splice(i, 1);
+      G.score += f.pts;
+      spawnParticles(G.player.x, G.player.y, '#44ff88', 12);
+      showFoodNotif(f.emoji, f.pts);
+      updateHUD();
+    }
+  }
+
+  // Particles
+  for (let i = G.particles.length - 1; i >= 0; i--) {
+    const p = G.particles[i];
+    p.x += p.vx * speed; p.y += p.vy * speed;
+    p.life -= speed; p.vy += 0.1 * speed;
+    if (p.life <= 0) G.particles.splice(i, 1);
+  }
+
+  // Level up
+  const newLevel = Math.floor(G.score / 100) + 1;
+  if (newLevel > G.level) G.level = newLevel;
+}
+
+function spawnObstacle() {
+  const types = OBSTACLE_TYPES.filter((_, i) => i <= Math.min(7, 2 + G.level));
+  const t = types[Math.floor(Math.random() * types.length)];
+  const margin = 40;
+  G.obstacles.push({
+    ...t,
+    x: margin + Math.random() * (G.W - margin * 2),
+    y: -60,
+    wobble: Math.random() * Math.PI * 2,
+    speed: t.speed + G.level * 0.3 + Math.random() * 0.5,
+  });
+}
+
+function spawnFood() {
+  const t = FOOD_TYPES[Math.floor(Math.random() * FOOD_TYPES.length)];
+  const margin = 40;
+  G.foods.push({
+    ...t,
+    x: margin + Math.random() * (G.W - margin * 2),
+    y: -60,
+    wobble: Math.random() * Math.PI * 2,
+    speed: t.speed + G.level * 0.15 + Math.random() * 0.4,
+    pulse: 0,
+    isFood: true,
+  });
+}
+
+function checkCollision(player, obs) {
+  const ph = player.h * 0.55, pw = player.w * 0.6;
+  const oh = obs.h * 0.7, ow = obs.w * 0.7;
+  return Math.abs(player.x - obs.x) < (pw + ow) / 2 &&
+         Math.abs(player.y - obs.y) < (ph + oh) / 2;
+}
+
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = 1.5 + Math.random() * 3;
+    G.particles.push({ x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd-2, life: 20+Math.random()*20, color });
+  }
+}
+
+function showFoodNotif(emoji, pts) {
+  const el = document.createElement('div');
+  el.className = 'coin-burst';
+  el.textContent = `${emoji} +${pts}`;
+  el.style.left = (20 + Math.random() * 60) + '%';
+  el.style.top = '45%';
+  el.style.fontSize = '22px';
+  el.style.background = 'rgba(255,220,0,0.9)';
+  el.style.color = '#012169';
+  el.style.borderRadius = '12px';
+  el.style.padding = '4px 10px';
+  el.style.fontWeight = '800';
+  el.style.fontFamily = 'Nunito, sans-serif';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function draw() {
+  const ctx = G.ctx;
+  const W = G.W, H = G.H;
+
+  // === THAMES RIVER BACKGROUND ===
+  // Sky gradient (top ~22% of canvas)
+  const skyH = H * 0.22;
+  const sky = ctx.createLinearGradient(0, 0, 0, skyH);
+  sky.addColorStop(0, '#b8cfe8');
+  sky.addColorStop(1, '#d8e8f0');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, skyH);
+
+  // === TOWER BRIDGE ===
+  drawTowerBridge(ctx, W, skyH);
+
+  // River body
+  const riverGrad = ctx.createLinearGradient(0, skyH, 0, H);
+  riverGrad.addColorStop(0, '#3a6186');
+  riverGrad.addColorStop(0.4, '#3d7a8a');
+  riverGrad.addColorStop(1, '#2a5068');
+  ctx.fillStyle = riverGrad;
+  ctx.fillRect(0, skyH, W, H - skyH);
+
+  // Animated river wave stripes (flowing downward)
+  ctx.save();
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = '#aad4e8';
+  for (let row = 0; row < 14; row++) {
+    const yBase = skyH + ((row * 44 + G.bgY * 2) % (H - skyH + 44));
+    for (let col = 0; col < 5; col++) {
+      const xBase = col * (W / 4) + Math.sin(G.waveOffset + row * 0.8) * 12;
+      ctx.beginPath();
+      ctx.ellipse(xBase, yBase, W/10, 4, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // River shimmers
+  ctx.save();
+  ctx.globalAlpha = 0.07;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 8; i++) {
+    const ys = skyH + 30 + i * ((H - skyH) / 8) + Math.sin(G.waveOffset * 1.3 + i) * 8;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.05, ys);
+    ctx.bezierCurveTo(W*0.3, ys - 6, W*0.7, ys + 6, W * 0.95, ys);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // River banks (sides)
+  ctx.fillStyle = '#5a7a4a';
+  ctx.fillRect(0, skyH, 18, H - skyH);
+  ctx.fillRect(W - 18, skyH, 18, H - skyH);
+
+  // Embankment wall lines
+  ctx.fillStyle = '#8a9a6a';
+  ctx.fillRect(14, skyH, 4, H - skyH);
+  ctx.fillRect(W - 18, skyH, 4, H - skyH);
+
+  // === OBSTACLES ===
+  G.obstacles.forEach(o => {
+    // Shadow
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(o.x + 3, o.y + 6, o.w * 0.35, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // Emoji
+    ctx.font = `${Math.max(o.w, o.h) * 0.72}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(o.emoji, o.x, o.y);
+  });
+
+  // === FOOD ITEMS ===
+  G.foods.forEach(f => {
+    const scale = 1 + Math.sin(f.pulse) * 0.08;
+    // Glowing halo
+    ctx.save();
+    ctx.globalAlpha = 0.35 + Math.sin(f.pulse) * 0.15;
+    const grad = ctx.createRadialGradient(f.x, f.y, 4, f.x, f.y, f.w * 0.85);
+    grad.addColorStop(0, '#ffe066');
+    grad.addColorStop(1, 'rgba(255,200,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.w * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // Shadow
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(f.x + 3, f.y + 6, f.w * 0.35, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // Emoji (pulsing)
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.scale(scale, scale);
+    ctx.font = `${Math.max(f.w, f.h) * 0.78}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(f.emoji, 0, 0);
+    ctx.restore();
+    // "FANG MICH!" label
+    ctx.save();
+    ctx.font = 'bold 9px Nunito, sans-serif';
+    ctx.fillStyle = '#ffdd00';
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2.5;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.strokeText('FANG MICH!', f.x, f.y + f.h * 0.45);
+    ctx.fillText('FANG MICH!', f.x, f.y + f.h * 0.45);
+    ctx.restore();
+  });
+
+  // === PARTICLES ===
+  G.particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = p.life / 40;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // === PLAYER BOAT ===
+  const px = G.player.x, py = G.player.y;
+  const flash = G.invincible > 0 && Math.floor(G.invincible / 6) % 2 === 0;
+  if (!flash) {
+    // Boat wake
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#a8d4e8';
+    ctx.lineWidth = 2;
+    for (let w = 0; w < 3; w++) {
+      ctx.beginPath();
+      ctx.ellipse(px, py + 20 + w * 12, (w + 1) * 14, 3, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Shadow under boat
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(px + 2, py + 8, 22, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Draw rowing boat SVG-style via canvas
+    drawBoat(ctx, px, py);
+  }
+
+  // === SCORE + LEVEL OVERLAY (in canvas) ===
+  ctx.save();
+  ctx.font = 'bold 15px Nunito, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Level ${G.level}`, 26, skyH + 20);
+  ctx.restore();
+}
+
+function drawBoat(ctx, x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Hull
+  ctx.fillStyle = '#8B4513';
+  ctx.beginPath();
+  ctx.moveTo(-22, -8);
+  ctx.lineTo(22, -8);
+  ctx.lineTo(16, 14);
+  ctx.lineTo(-16, 14);
+  ctx.closePath();
+  ctx.fill();
+
+  // Hull highlight
+  ctx.fillStyle = '#a0522d';
+  ctx.beginPath();
+  ctx.moveTo(-20, -7);
+  ctx.lineTo(20, -7);
+  ctx.lineTo(18, -2);
+  ctx.lineTo(-18, -2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Inner boat
+  ctx.fillStyle = '#deb887';
+  ctx.beginPath();
+  ctx.moveTo(-16, -4);
+  ctx.lineTo(16, -4);
+  ctx.lineTo(12, 10);
+  ctx.lineTo(-12, 10);
+  ctx.closePath();
+  ctx.fill();
+
+  // Rower (stick figure)
+  ctx.strokeStyle = '#2c2c2c';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  // Body
+  ctx.beginPath(); ctx.moveTo(0, 2); ctx.lineTo(0, -12); ctx.stroke();
+  // Head
+  ctx.fillStyle = '#f5cba7';
+  ctx.beginPath(); ctx.arc(0, -16, 5.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#c0874f'; ctx.lineWidth = 1.2; ctx.stroke();
+  // Arms + oars
+  ctx.strokeStyle = '#2c2c2c'; ctx.lineWidth = 2.2;
+  const oarSwing = Math.sin(Date.now() * 0.004) * 8;
+  // Left oar
+  ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(-28 + oarSwing, -2 + oarSwing * 0.3); ctx.stroke();
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(-32 + oarSwing, -4 + oarSwing * 0.3, 10, 4);
+  // Right oar
+  ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(28 - oarSwing, -2 - oarSwing * 0.3); ctx.stroke();
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(22 - oarSwing, -4 - oarSwing * 0.3, 10, 4);
+  // Hair
+  ctx.fillStyle = '#4a2c08';
+  ctx.beginPath(); ctx.arc(0, -19, 5.5, Math.PI, 0); ctx.fill();
+  // Union Jack mini flag
+  ctx.fillStyle = '#012169';
+  ctx.fillRect(2, -28, 14, 9);
+  ctx.fillStyle = '#C8102E';
+  ctx.fillRect(2, -28, 14, 3);
+  ctx.fillRect(2, -22, 14, 3);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(2, -25, 14, 3);
+
+  ctx.restore();
+}
+
+function drawTowerBridge(ctx, W, skyH) {
+  const bH = skyH + 10; // bridge bottom extends slightly into river
+  const cx = W / 2;
+
+  // Sky background for bridge area
+  ctx.fillStyle = '#c8d8e8';
+  ctx.fillRect(0, 0, W, skyH);
+
+  // Distant London skyline (simple silhouette)
+  ctx.fillStyle = '#8a9aaa';
+  // St Paul's dome hint
+  ctx.beginPath(); ctx.arc(cx - W*0.28, skyH - 22, 14, Math.PI, 0); ctx.fill();
+  ctx.fillRect(cx - W*0.31, skyH - 22, 8, 22);
+  // Generic buildings
+  [[0.05,30,18],[0.12,22,24],[0.18,38,16],[0.72,28,20],[0.80,20,16],[0.87,34,14],[0.93,18,20]].forEach(([rx, h, w]) => {
+    ctx.fillRect(rx * W, skyH - h, w, h);
+  });
+
+  // === BRIDGE DECK ===
+  const deckY = skyH - 28;
+  const deckH = 12;
+  // Bridge road surface
+  ctx.fillStyle = '#7a8090';
+  ctx.fillRect(20, deckY, W - 40, deckH);
+  // Road markings
+  ctx.fillStyle = '#f0f0d0';
+  for (let mx = 60; mx < W - 60; mx += 28) {
+    ctx.fillRect(mx, deckY + 4, 14, 4);
+  }
+
+  // === TOWERS ===
+  const tW = Math.max(22, W * 0.09);
+  const tH = skyH * 0.88;
+  const leftTX = cx - W * 0.22;
+  const rightTX = cx + W * 0.22;
+
+  [leftTX, rightTX].forEach(tx => {
+    // Tower base
+    ctx.fillStyle = '#9a8060';
+    ctx.fillRect(tx - tW/2, skyH - tH, tW, tH);
+
+    // Tower stone texture (horizontal lines)
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    for (let sy = skyH - tH + 8; sy < skyH; sy += 10) {
+      ctx.fillRect(tx - tW/2, sy, tW, 2);
+    }
+
+    // Tower windows (gothic arches)
+    ctx.fillStyle = '#4a3a20';
+    const wTop = skyH - tH + tH * 0.18;
+    for (let wi = 0; wi < 3; wi++) {
+      const wy = wTop + wi * (tH * 0.15);
+      ctx.beginPath();
+      ctx.moveTo(tx - 4, wy + 10);
+      ctx.lineTo(tx - 4, wy + 3);
+      ctx.arc(tx, wy + 3, 4, Math.PI, 0);
+      ctx.lineTo(tx + 4, wy + 10);
+      ctx.fill();
+    }
+
+    // Tower top battlements
+    ctx.fillStyle = '#b89a70';
+    ctx.fillRect(tx - tW/2 - 4, skyH - tH, tW + 8, 10);
+    for (let bi = 0; bi < 5; bi++) {
+      ctx.fillRect(tx - tW/2 - 4 + bi * (tW + 8) / 5, skyH - tH - 8, (tW + 8) / 6, 10);
+    }
+
+    // Upper turret
+    ctx.fillStyle = '#9a8060';
+    ctx.fillRect(tx - tW/2 + 2, skyH - tH - 18, tW - 4, 18);
+    ctx.fillStyle = '#b89a70';
+    // Turret top
+    ctx.beginPath();
+    ctx.moveTo(tx - tW/2, skyH - tH - 18);
+    ctx.lineTo(tx, skyH - tH - 34);
+    ctx.lineTo(tx + tW/2, skyH - tH - 18);
+    ctx.fill();
+    // Turret flag
+    ctx.strokeStyle = '#C8102E';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(tx, skyH - tH - 34); ctx.lineTo(tx, skyH - tH - 46); ctx.stroke();
+    ctx.fillStyle = '#C8102E';
+    ctx.beginPath(); ctx.moveTo(tx, skyH - tH - 46); ctx.lineTo(tx + 8, skyH - tH - 41); ctx.lineTo(tx, skyH - tH - 36); ctx.fill();
+  });
+
+  // === HIGH-LEVEL WALKWAY (between towers) ===
+  const walkY = skyH - tH + tH * 0.18;
+  const walkH = 10;
+  ctx.fillStyle = '#9a8060';
+  ctx.fillRect(leftTX + tW/2, walkY, rightTX - leftTX - tW, walkH);
+  // Walkway windows
+  ctx.fillStyle = '#5a7099';
+  const walkW = rightTX - leftTX - tW;
+  const walkX = leftTX + tW/2;
+  for (let wi = 0; wi < 4; wi++) {
+    ctx.fillRect(walkX + 8 + wi * (walkW - 16) / 4, walkY + 2, (walkW - 40) / 5, walkH - 4);
+  }
+
+  // === SUSPENSION CHAINS ===
+  ctx.strokeStyle = '#5a5040';
+  ctx.lineWidth = 2.5;
+  [[-0.5, 0.5], [0.5, -0.5]].forEach(([a, b]) => {
+    ctx.beginPath();
+    ctx.moveTo(leftTX + tW/2, deckY + deckH/2);
+    ctx.quadraticCurveTo(cx, deckY + 22, rightTX - tW/2, deckY + deckH/2);
+    ctx.stroke();
+  });
+
+  // Verticals from chains to deck
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = '#6a6050';
+  const chainSteps = 10;
+  for (let ci = 1; ci < chainSteps; ci++) {
+    const t = ci / chainSteps;
+    const chainX = leftTX + tW/2 + t * (rightTX - tW - leftTX);
+    const chainY = deckY + deckH/2 + 22 * Math.sin(t * Math.PI);
+    ctx.beginPath(); ctx.moveTo(chainX, chainY); ctx.lineTo(chainX, deckY + deckH); ctx.stroke();
+  }
+
+  // Bridge sign
+  ctx.fillStyle = 'rgba(1,33,105,0.85)';
+  const signW = 80, signH = 16;
+  ctx.fillRect(cx - signW/2, deckY - 2, signW, signH);
+  ctx.fillStyle = '#F4C430';
+  ctx.font = 'bold 9px Nunito, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('TOWER BRIDGE', cx, deckY + signH/2);
+}
+
+function updateHUD() {
+  document.getElementById('g-score').textContent = G.score;
+  const hearts = ['', '❤️', '❤️❤️', '❤️❤️❤️'];
+  document.getElementById('g-lives').textContent = hearts[Math.max(0, G.lives)] || '';
+}
+
+function gameOver() {
+  G.running = false;
+  if (G.raf) cancelAnimationFrame(G.raf);
+
+  const ctx = G.ctx;
+  const W = G.W, H = G.H;
+
+  // Darken
+  ctx.fillStyle = 'rgba(0,0,0,0.65)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Game Over panel
+  const pW = Math.min(320, W - 40);
+  const pX = (W - pW) / 2;
+  const pY = H / 2 - 120;
+  ctx.fillStyle = '#012169';
+  roundRect(ctx, pX, pY, pW, 240, 20);
+  ctx.fill();
+
+  ctx.fillStyle = '#F4C430';
+  ctx.font = 'bold 32px Fredoka One, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Game Over!', W/2, pY + 52);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px Nunito, sans-serif';
+  ctx.fillText(`Punkte: ${G.score}`, W/2, pY + 90);
+  ctx.font = '14px Nunito, sans-serif';
+  ctx.fillStyle = '#aac8e8';
+  ctx.fillText(`Level ${G.level} erreicht`, W/2, pY + 116);
+
+  // Buttons
+  ctx.fillStyle = '#C8102E';
+  roundRect(ctx, W/2 - 80, pY + 140, 160, 44, 10);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px Nunito, sans-serif';
+  ctx.fillText('🔄 Nochmal!', W/2, pY + 167);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  roundRect(ctx, W/2 - 70, pY + 194, 140, 34, 8);
+  ctx.fill();
+  ctx.fillStyle = '#aac8e8';
+  ctx.font = '13px Nunito, sans-serif';
+  ctx.fillText('✖ Schließen', W/2, pY + 212);
+
+  // Click handlers for the game-over screen
+  G.canvas.onclick = e => {
+    const r = G.canvas.getBoundingClientRect();
+    const scaleX = G.W / r.width, scaleY = G.H / r.height;
+    const mx = (e.clientX - r.left) * scaleX;
+    const my = (e.clientY - r.top) * scaleY;
+    if (mx > W/2-80 && mx < W/2+80 && my > pY+140 && my < pY+184) {
+      G.canvas.onclick = null;
+      initGame();
+    } else if (mx > W/2-70 && mx < W/2+70 && my > pY+194 && my < pY+228) {
+      G.canvas.onclick = null;
+      closeGame();
+    }
+  };
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+</script>
+</body>
+</html>
