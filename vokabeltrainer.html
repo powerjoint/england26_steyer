@@ -688,9 +688,9 @@
 
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="showSection('home')">🏠 Start</button>
-  <button class="tab-btn" onclick="showSection('quiz')">🎯 Quiz</button>
+  <button class="tab-btn" id="tab-quiz" onclick="showSection('quiz')">🎯 Quiz</button>
   <button class="tab-btn" onclick="showSection('phrasebook')">📖 Phrasebook</button>
-  <button class="tab-btn" onclick="showSection('scores')">🏆 Punkte</button>
+  <button class="tab-btn" id="tab-scores" onclick="showSection('scores')">🏆 Punkte</button>
 </div>
 
 <div class="notif" id="notif"></div>
@@ -2121,6 +2121,44 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x, y, x+r, y);
   ctx.closePath();
 }
+
+// ===== SECRET CHEAT: Zwei-Finger-Touch auf Quiz + Punkte startet Bonusspiel =====
+(function() {
+  const HOLD_MS = 400; // beide Buttons müssen ~400ms gleichzeitig gehalten werden
+  let quizTouch = false, scoresTouch = false, cheatTimer = null;
+
+  function checkCheat() {
+    if (quizTouch && scoresTouch) {
+      cheatTimer = setTimeout(() => {
+        if (quizTouch && scoresTouch) {
+          openGame();
+        }
+      }, HOLD_MS);
+    } else {
+      clearTimeout(cheatTimer);
+    }
+  }
+
+  document.getElementById('tab-quiz').addEventListener('touchstart', e => {
+    quizTouch = true; checkCheat();
+  }, { passive: true });
+  document.getElementById('tab-quiz').addEventListener('touchend', () => {
+    quizTouch = false; clearTimeout(cheatTimer);
+  });
+  document.getElementById('tab-quiz').addEventListener('touchcancel', () => {
+    quizTouch = false; clearTimeout(cheatTimer);
+  });
+
+  document.getElementById('tab-scores').addEventListener('touchstart', e => {
+    scoresTouch = true; checkCheat();
+  }, { passive: true });
+  document.getElementById('tab-scores').addEventListener('touchend', () => {
+    scoresTouch = false; clearTimeout(cheatTimer);
+  });
+  document.getElementById('tab-scores').addEventListener('touchcancel', () => {
+    scoresTouch = false; clearTimeout(cheatTimer);
+  });
+})();
 </script>
 </body>
 </html>
