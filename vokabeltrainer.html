@@ -1325,6 +1325,12 @@ function openGame() {
 function closeGame() {
   G.running = false;
   if (G.raf) cancelAnimationFrame(G.raf);
+  if (G._tiltHandler) {
+    window.removeEventListener('deviceorientation', G._tiltHandler, true);
+    G._tiltHandler = null;
+  }
+  document.onkeydown = null;
+  document.onkeyup = null;
   document.getElementById('game-overlay').classList.remove('active');
 }
 
@@ -1352,28 +1358,29 @@ function initGame() {
   G.player.vx = 0;
 
   updateHUD();
-  setupGameInput();
+  // Double-tap on canvas → recalibrate tilt neutral
+  let _lastTap = 0;
+  G.canvas.addEventListener('touchend', e => {
+    const now = Date.now();
+    if (now - _lastTap < 350) {
+      G.tiltBase = null;
+      showTiltHint();
+    }
+    _lastTap = now;
+  });
   G.running = true;
   G.lastTime = performance.now();
   G.raf = requestAnimationFrame(gameLoop);
 }
 
 function setupGameInput() {
-  const c = G.canvas;
-  c.onmousemove = e => {
-    if (!G.running) return;
-    const r = c.getBoundingClientRect();
-    const scaleX = G.W / r.width;
-    G.player.x = (e.clientX - r.left) * scaleX;
-  };
-  c.ontouchstart = e => { e.preventDefault(); G.touchStartX = e.touches[0].clientX; };
-  c.ontouchmove = e => {
-    e.preventDefault();
-    if (!G.running) return;
-    const r = c.getBoundingClientRect();
-    const scaleX = G.W / r.width;
-    G.player.x = (e.touches[0].clientX - r.left) * scaleX;
-  };
+  // Clean up any previous tilt listener
+  if (G._tiltHandler) {
+    window.removeEventListener('deviceorientation', G._tiltHandler);
+    G._tiltHandler = null;
+  }
+
+  // --- Keyboard fallback (desktop) ---
   document.onkeydown = e => {
     if (!G.running) return;
     if (e.key === 'ArrowLeft')  G.player.vx = -G.player.speed;
@@ -1382,7 +1389,96 @@ function setupGameInput() {
   document.onkeyup = e => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') G.player.vx = 0;
   };
+
+  // --- Tilt calibration ---
+  G.tiltBase = null;       // calibrated neutral gamma
+  G.tiltGamma = 0;         // current smoothed tilt
+  G.tiltAvailable = false;
+
+  function startTilt() {
+    G._tiltHandler = e => {
+      if (!G.running) return;
+      let gamma = e.gamma ?? 0;   // -90…+90 (left/right tilt)
+
+      // Auto-calibrate on first reading
+      if (G.tiltBase === null) G.tiltBase = gamma;
+
+      // Smooth the signal (lerp)
+      G.tiltGamma += (gamma - G.tiltGamma) * 0.25;
+
+      const tilt = G.tiltGamma - G.tiltBase;  // offset from neutral
+      const deadzone = 3;                       // ±3° dead zone
+
+      if (Math.abs(tilt) < deadzone) {
+        G.player.vx = 0;
+      } else {
+        // Map ±30° of real tilt to full speed; clamp beyond that
+        const maxTilt = 30;
+        const ratio = Math.max(-1, Math.min(1, (tilt - Math.sign(tilt) * deadzone) / (maxTilt - deadzone)));
+        G.player.vx = ratio * G.player.speed * 1.8;
+      }
+    };
+    window.addEventListener('deviceorientation', G._tiltHandler, true);
+    G.tiltAvailable = true;
+  }
+
+  // iOS 13+ requires permission
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission()
+      .then(state => { if (state === 'granted') startTilt(); })
+      .catch(() => {});
+  } else if (window.DeviceOrientationEvent) {
+    startTilt();
+  }
+
+  // Show tilt hint overlay briefly
+  showTiltHint();
 }
+
+function showTiltHint() {
+  // Remove existing hint if any
+  const old = document.getElementById('tilt-hint');
+  if (old) old.remove();
+
+  const hint = document.createElement('div');
+  hint.id = 'tilt-hint';
+  hint.innerHTML = `<div style="font-size:52px;margin-bottom:8px;animation:tiltRock 0.8s ease-in-out infinite alternate">📱</div>
+    <div style="font-size:17px;font-weight:800;color:#F4C430;margin-bottom:4px">Smartphone neigen!</div>
+    <div style="font-size:13px;opacity:0.85">Links/rechts kippen = Boot steuern</div>
+    <div style="font-size:11px;opacity:0.6;margin-top:6px">Halte es gerade, um zu kalibrieren</div>`;
+  hint.style.cssText = `
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    background:rgba(1,33,105,0.92);color:white;
+    border-radius:20px;padding:24px 32px;text-align:center;
+    z-index:200;pointer-events:none;
+    border:2px solid rgba(244,196,48,0.5);
+    backdrop-filter:blur(4px);
+  `;
+
+  // Add keyframe animation if not present
+  if (!document.getElementById('tilt-style')) {
+    const s = document.createElement('style');
+    s.id = 'tilt-style';
+    s.textContent = `@keyframes tiltRock {
+      from { transform: rotate(-25deg); }
+      to   { transform: rotate(25deg); }
+    }`;
+    document.head.appendChild(s);
+  }
+
+  const overlay = document.getElementById('game-overlay');
+  overlay.style.position = 'relative';
+  overlay.appendChild(hint);
+
+  // Fade out after 2.5 s
+  setTimeout(() => {
+    hint.style.transition = 'opacity 0.6s';
+    hint.style.opacity = '0';
+    setTimeout(() => hint.remove(), 700);
+  }, 2500);
+}
+
 
 function gameLoop(ts) {
   if (!G.running) return;
