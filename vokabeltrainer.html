@@ -1317,6 +1317,8 @@ const FOOD_TYPES = [
 ];
 
 function openGame() {
+  window.scrollTo(0, 0);
+  document.body.style.overflow = 'hidden';
   const overlay = document.getElementById('game-overlay');
   overlay.classList.add('active');
   initGame();
@@ -1337,6 +1339,7 @@ function closeGame() {
   document.onkeyup = null;
   var hint = document.getElementById('tilt-hint');
   if (hint) hint.remove();
+  document.body.style.overflow = '';
   document.getElementById('game-overlay').classList.remove('active');
 }
 
