@@ -1516,7 +1516,10 @@ function update(dt) {
   G.player.x += G.player.vx * speed;
   G.player.x = Math.max(G.player.w/2, Math.min(G.W - G.player.w/2, G.player.x));
 
-  // Spawn obstacles (pause briefly after food spawns so screen is clear)
+  // Food clear timer counts down after each food spawn
+  if (G.foodClearTimer > 0) G.foodClearTimer -= speed;
+
+  // Spawn obstacles — skip while food is on screen having its clear window
   G.spawnTimer += speed;
   if (G.spawnTimer >= G.spawnInterval && G.foodClearTimer <= 0) {
     G.spawnTimer = 0;
@@ -1524,22 +1527,17 @@ function update(dt) {
     G.spawnInterval = Math.max(38, 90 - G.score * 0.08);
   }
 
-  // Food clear timer counts down after each food spawn
-  if (G.foodClearTimer > 0) G.foodClearTimer -= speed;
-
-  // Spawn food items — only when no obstacles are in the upper third of the screen
+  // Spawn food items — always spawn when timer is up, but clear obstacles first
   G.foodSpawnTimer += speed;
   if (G.foodSpawnTimer >= G.foodSpawnInterval) {
-    const upperObstacles = G.obstacles.filter(o => o.y < G.H * 0.5);
-    if (upperObstacles.length === 0) {
-      G.foodSpawnTimer = 0;
-      spawnFood();
-      G.foodSpawnInterval = Math.max(120, 200 - G.score * 0.05);
-      // Pause obstacle spawning for ~2 seconds so food has a clear lane
-      G.foodClearTimer = 120;
-      G.spawnTimer = 0;
-    }
-    // else: keep waiting until screen upper half is clear
+    G.foodSpawnTimer = 0;
+    // Remove all current obstacles to give a clear lane for the food item
+    G.obstacles = [];
+    spawnFood();
+    G.foodSpawnInterval = Math.max(130, 220 - G.score * 0.05);
+    // Block obstacle spawning for ~2.5 seconds (150 frames) so food has time to reach player
+    G.foodClearTimer = 150;
+    G.spawnTimer = 0;
   }
 
   // Update obstacles
