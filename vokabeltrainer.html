@@ -1178,7 +1178,7 @@ function showResults() {
     <div class="results-earned">💷 Insgesamt: £${state.score} gesammelt!</div>
     <div class="analysis-box"><h3>📊 Deine Analyse</h3><p>${analysis}</p></div>
     ${gameUnlocked ? `
-    <div id="game-unlock-banner" onclick="openGame()">
+    <div id="game-unlock-banner" onclick="requestTiltPermissionAndOpen()">
       <h3>🎮 Belohnung freigeschaltet!</h3>
       <p>Du hast ${pct}% erreicht – jetzt darfst du auf der Themse rudern!<br>
       <strong>Tippe hier, um das Spiel zu starten ⛵</strong></p>
@@ -1316,6 +1316,18 @@ const FOOD_TYPES = [
   { emoji:'☕', label:'Tea',      w:40, h:40, speed:1.8, pts:20 },
 ];
 
+function requestTiltPermissionAndOpen() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+: must call requestPermission directly inside a user gesture
+    DeviceOrientationEvent.requestPermission()
+      .then(state => { openGame(); })
+      .catch(() => { openGame(); }); // open anyway even if denied
+  } else {
+    openGame();
+  }
+}
+
 function openGame() {
   window.scrollTo(0, 0);
   document.body.style.overflow = 'hidden';
@@ -1441,13 +1453,9 @@ function setupGameInput() {
   };
   G.canvas.addEventListener('touchend', G._doubleTapHandler);
 
-  // iOS 13+ requires explicit permission
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission()
-      .then(function(state) { if (state === 'granted') startTilt(); })
-      .catch(function() {});
-  } else if (typeof DeviceOrientationEvent !== 'undefined') {
+  // Permission was already requested before openGame() was called.
+  // Just start tilt directly (works on iOS and Android).
+  if (typeof DeviceOrientationEvent !== 'undefined') {
     startTilt();
   }
 
@@ -2131,7 +2139,7 @@ function roundRect(ctx, x, y, w, h, r) {
     if (quizTouch && scoresTouch) {
       cheatTimer = setTimeout(() => {
         if (quizTouch && scoresTouch) {
-          openGame();
+          requestTiltPermissionAndOpen();
         }
       }, HOLD_MS);
     } else {
