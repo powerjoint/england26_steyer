@@ -1361,7 +1361,7 @@ function initGame() {
   G.obstacles = []; G.foods = []; G.particles = [];
   G.waveOffset = 0; G.spawnTimer = 0;
   G.foodSpawnTimer = 0; G.foodSpawnInterval = 180;
-  G.spawnInterval = 90; G.invincible = 0; G.bgY = 0; G.foodClearTimer = 0;
+  G.spawnInterval = 90; G.invincible = 0; G.bgY = 0; G.foodClearTimer = 0; G.foodWaitTimer = 0;
   G.player.x = G.W / 2;
   G.player.y = G.H - 80;
   G.player.vx = 0;
@@ -1527,17 +1527,22 @@ function update(dt) {
     G.spawnInterval = Math.max(38, 90 - G.score * 0.08);
   }
 
-  // Spawn food items — always spawn when timer is up, but clear obstacles first
+  // Spawn food items — wait until screen upper half is clear, max 3 s extra wait
   G.foodSpawnTimer += speed;
   if (G.foodSpawnTimer >= G.foodSpawnInterval) {
-    G.foodSpawnTimer = 0;
-    // Remove all current obstacles to give a clear lane for the food item
-    G.obstacles = [];
-    spawnFood();
-    G.foodSpawnInterval = Math.max(130, 220 - G.score * 0.05);
-    // Block obstacle spawning for ~2.5 seconds (150 frames) so food has time to reach player
-    G.foodClearTimer = 150;
-    G.spawnTimer = 0;
+    const blocking = G.obstacles.some(o => o.y < G.H * 0.55);
+    // Grace period: allow up to 180 extra frames (~3 s) for screen to clear
+    G.foodWaitTimer = (G.foodWaitTimer || 0) + speed;
+    if (!blocking || G.foodWaitTimer > 180) {
+      G.foodWaitTimer = 0;
+      G.foodSpawnTimer = 0;
+      spawnFood();
+      G.foodSpawnInterval = Math.max(130, 220 - G.score * 0.05);
+      G.foodClearTimer = 150;
+      G.spawnTimer = 0;
+    }
+  } else {
+    G.foodWaitTimer = 0;
   }
 
   // Update obstacles
