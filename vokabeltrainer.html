@@ -2132,14 +2132,32 @@ function roundRect(ctx, x, y, w, h, r) {
 
 // ===== SECRET CHEAT: Zwei-Finger-Touch auf Quiz + Punkte startet Bonusspiel =====
 (function() {
-  const HOLD_MS = 400; // beide Buttons müssen ~400ms gleichzeitig gehalten werden
-  let quizTouch = false, scoresTouch = false, cheatTimer = null;
+  const HOLD_MS = 500;
+  let quizTouch = false, scoresTouch = false;
+  let cheatTimer = null, permissionGranted = false, permissionAsked = false;
+
+  // iOS: requestPermission MUSS synchron im Touch-Handler aufgerufen werden.
+  // Deshalb fragen wir sofort beim zweiten Finger, nicht erst nach dem Timeout.
+  function askPermissionNow() {
+    if (permissionAsked) return;
+    permissionAsked = true;
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(state => { permissionGranted = (state === 'granted'); })
+        .catch(() => { permissionGranted = false; });
+    } else {
+      permissionGranted = true; // Android / Desktop — kein Dialog nötig
+    }
+  }
 
   function checkCheat() {
     if (quizTouch && scoresTouch) {
+      // Permission JETZT synchron abfragen (noch im Touch-Handler!)
+      askPermissionNow();
       cheatTimer = setTimeout(() => {
         if (quizTouch && scoresTouch) {
-          requestTiltPermissionAndOpen();
+          openGame(); // openGame nutzt Permission-Ergebnis direkt in setupGameInput
         }
       }, HOLD_MS);
     } else {
