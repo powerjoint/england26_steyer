@@ -548,13 +548,6 @@
     <div class="info-row"><span class="info-label">Hinreise</span><span class="info-value">Sonntag, 21. Juni 2026 <span id="countdown" style="color:#CF142B;font-weight:800;display:inline;white-space:nowrap;">– noch 38 Tage 17 Std 8 Min 7 Sek</span></span></div>
     <div class="info-row"><span class="info-label">Rückreise</span><span class="info-value">Freitag, 26. Juni 2026</span></div>
     <div class="info-row"><span class="info-label">Reiseziel</span><span class="info-value">England → <a href="https://de.wikipedia.org/wiki/Hastings" target="_blank" style="color:var(--uk-blue);text-decoration:underline;">Hastings</a> 🇬🇧</span></div>
-    <div class="notice-box info">
-      ℹ️ Bitte regelmäßig auf Änderungen prüfen!
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title"><span class="emoji">🏫</span> Unterkunft &amp; Organisation</div>
     <div class="info-row"><span class="info-label">Unterkunft</span><span class="info-value">Gastfamilien (Lehrer: The Lansdowne Hotel)</span></div>
     <div class="info-row"><span class="info-label">Verpflegung</span><span class="info-value">Gastfamilie &amp; Imbiss</span></div>
     <div class="info-row"><span class="info-label">Begleitpersonen</span><span class="info-value">Fr. Birk, Fr. Kazmaier, Fr. Perwög, Fr. Schneider, Fr. Zauner, Hr. Steyer</span></div>
@@ -811,6 +804,18 @@ Abfahrt am Abend stehen.</div></div><div class="tl-item"><div class="tl-dot"></d
         </span>
         <span class="pack-label">🔌 Steckdosenadapter UK</span>
       </li>
+      <li id="pack-22" onclick="togglePack(22)">
+        <span class="pack-box">
+          <svg class="pack-check" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11.5,2.5"></polyline></svg>
+        </span>
+        <span class="pack-label">🩱 Badehose / Badeanzug</span>
+      </li>
+      <li id="pack-23" onclick="togglePack(23)">
+        <span class="pack-box">
+          <svg class="pack-check" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11.5,2.5"></polyline></svg>
+        </span>
+        <span class="pack-label">🏖️ Handtücher</span>
+      </li>
     </ul>
     <div class="notice-box" style="margin-top:12px">
       💡 Tipp: In England sind Steckdosen anders als in Deutschland! Einen <a href="https://reiseadapter-reisestecker.de/europa/grossbritannien/" target="_blank" style="color:var(--uk-blue);font-weight:700;text-decoration:underline;">UK-Reiseadapter</a> nicht vergessen.
@@ -828,7 +833,7 @@ Abfahrt am Abend stehen.</div></div><div class="tl-item"><div class="tl-dot"></d
   <div class="card">
     <div class="card-title"><span class="emoji">💷</span> Geld &amp; Währung</div>
     <div class="info-row"><span class="info-label">Währung</span><span class="info-value">Britisches Pfund (£)</span></div>
-    <div class="info-row"><span class="info-label">Taschengeld</span><span class="info-value">wird noch bekannt gegeben</span></div>
+    <div class="info-row"><span class="info-label">Taschengeld</span><span class="info-value">Keine Grenze.</span></div>
     <div class="notice-box success">
       ✅ Pfund können bei der Bank oder am Flughafen gewechselt werden. Auch Kartenzahlung ist in England weit verbreitet.
     </div>
@@ -871,6 +876,85 @@ Abfahrt am Abend stehen.</div></div><div class="tl-item"><div class="tl-dot"></d
     </a>
     <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">
       Tippe auf den Button, um den Vokabeltrainer zu öffnen ☝️
+    </p>
+  </div>
+
+  <!-- ══ BIG BEN TRAINER ══ -->
+  <div class="card" style="text-align:center; padding:24px 20px;">
+    <div class="card-title" style="text-align:left;">
+      <span class="emoji">🎹</span> Westminster-Melodie spielen
+    </div>
+    <p style="font-size:15px; color:var(--text-muted); margin:10px 0 20px; text-align:left; line-height:1.5;">
+      Lerne die berühmte <strong style="color:var(--uk-blue);">Big-Ben-Melodie</strong> auf einer virtuellen
+      Klaviatur zu spielen – mit Vorspiel, Lernmodus und Glockenklängen.
+    </p>
+
+    <!-- Button im Stil des England Trip Trainers -->
+    <a href="BigBenTrainer.html" style="display:inline-block; text-decoration:none;">
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: linear-gradient(135deg, #00247D 0%, #001a5e 100%);
+        border-radius: 18px;
+        padding: 18px 26px;
+        box-shadow: 0 6px 28px rgba(0,36,125,0.35), 0 2px 8px rgba(0,0,0,0.15);
+        max-width: 380px;
+        margin: 0 auto;
+        transition: transform 0.18s, box-shadow 0.18s;
+        cursor: pointer;
+        border: 2px solid rgba(255,255,255,0.12);
+      "
+        onmouseover="this.style.transform='scale(1.03)';this.style.boxShadow='0 10px 36px rgba(0,36,125,0.45)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(0,36,125,0.35)'"
+        ontouchstart="this.style.transform='scale(0.96)'"
+        ontouchend="this.style.transform=''"
+      >
+        <!-- Big Ben SVG Icon -->
+        <div style="flex-shrink:0; width:52px; height:52px; background:rgba(255,255,255,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+          <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="13" y="0" width="6" height="4" fill="#F9C74F"/>
+            <rect x="11" y="4" width="10" height="3" fill="#F9C74F"/>
+            <rect x="12" y="7" width="8" height="14" fill="#e8b840"/>
+            <rect x="10" y="21" width="12" height="2" fill="#F9C74F"/>
+            <rect x="9"  y="23" width="14" height="14" fill="#d4a830" rx="1"/>
+            <rect x="11" y="25" width="10" height="10" fill="#00247D"/>
+            <circle cx="16" cy="30" r="4" fill="none" stroke="#F9C74F" stroke-width="1"/>
+            <line x1="16" y1="30" x2="16" y2="27.5" stroke="#F9C74F" stroke-width=".8"/>
+            <line x1="16" y1="30" x2="18.5" y2="30" stroke="#F9C74F" stroke-width=".8"/>
+            <rect x="7" y="37" width="18" height="3" fill="#F9C74F" rx="1"/>
+          </svg>
+        </div>
+
+        <!-- Text -->
+        <div style="text-align:left; flex:1;">
+          <div style="
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 17px;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 3px;
+          ">Big Ben Trainer</div>
+          <div style="
+            font-size: 12px;
+            color: rgba(255,255,255,0.65);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+          ">Westminster-Melodie · Glockenklang · Lernmodus</div>
+        </div>
+
+        <!-- Pfeil -->
+        <div style="flex-shrink:0; width:36px; height:36px; background:rgba(249,199,79,0.18); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3l5 5-5 5" stroke="#F9C74F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </a>
+
+    <p style="font-size:12px; color:var(--text-muted); margin-top:14px;">
+      Tippe auf den Button, um den Big Ben Trainer zu öffnen 🔔
     </p>
   </div>
 
